@@ -42,14 +42,13 @@ let training = true;
 
 const prepareData = trainingSet => {
   console.table(trainingSet[0]);
-  const totalTraingSamples = trainingSet.length;
-  console.log(`total datos cargados: ${totalTraingSamples}`);
+  console.log(`total data loaded: ${trainingSet.length}`);
 
   const cleanedDataset = oneHotEncodeOrigin(
     datasetToFloat(removeBadSamples(trainingSet))
   );
   console.log(
-    `datos después de eliminar valores inválidos, pasar a Number y one-hot encode origin: `
+    `Dataset after de removing missing values, parsing numeric values to Float and one-hot encode origin column: `
   );
   console.log(cleanedDataset.length);
   console.log(cleanedDataset[0]);
@@ -66,29 +65,27 @@ const prepareData = trainingSet => {
   };
 
   const numItemsTraining = ~~(0.8 * cleanedDataset.length);
-  console.log(`datos para entrenamiento 80%: ${numItemsTraining}`);
+  console.log(`Training samples 80%: ${numItemsTraining}`);
 
   const shuffledDataSet = shuffle(cleanedDataset);
-  console.log(`muestra de dato despues de shuffle: `);
-  console.log(shuffledDataSet[0]);
 
   let trainDataSet = [];
   for (let i = 0; i < numItemsTraining; i++) {
     trainDataSet.push(shuffledDataSet[i]);
   }
 
-  console.log(`Tamaño final trainDataSet: ${trainDataSet.length}`);
+  console.log(`Final size of trainDataSet: ${trainDataSet.length}`);
 
   let testDataSet = [];
   for (let i = numItemsTraining; i < shuffledDataSet.length; i++) {
     testDataSet.push(shuffledDataSet[i]);
   }
 
-  console.log(`Tamaño final testDataSet: ${testDataSet.length}`);
+  console.log(`Final size of testDataSet: ${testDataSet.length}`);
 
   console.assert(
     testDataSet.length + trainDataSet.length === cleanedDataset.length,
-    "Los datasets tienen difrente tamaño"
+    "Datasets have not the same size"
   );
 
   const getLabels = dataset => {
@@ -205,16 +202,18 @@ const buildModel = () => {
   });
 };
 
-const trainData = async () => {
-  let numSteps = 10;
+const trainData = async (numSteps = 5, epochs = 100) => {
   let trainingStepsDiv = document.getElementsByClassName("training-steps")[0];
+
   for (let i = 0; i < numSteps; i++) {
     let res = await model.fit(trainDataTensor, trainLabelsTensor, {
-      epochs: 100
+      epochs
     });
+
     console.log(
       `Training step: ${i}/${numSteps - 1}, loss: ${res.history.loss[0]}`
     );
+
     console.log(`MAE: ${res.history.mae[0]}`);
     trainingStepsDiv.innerHTML = `Training step: ${i}/${numSteps -
       1}, loss: ${res.history.loss[0].toFixed(
