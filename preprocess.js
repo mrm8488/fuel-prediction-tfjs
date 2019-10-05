@@ -23,15 +23,22 @@ function removeBadSamples(dataset) {
   return dataset.filter(object => areAllValuesValid(object));
 }
 
+/**
+ * Convert dataset string values to Float
+ * @param {Array} dataset 
+ */
 function datasetToFloat(dataset) {
   dataset.forEach(sample => {
     for (let [key, value] of Object.entries(sample)) {
-      sample[key] = Number(value);
+      sample[key] = parseFloat(value);
     }
   });
   return dataset;
 }
-
+/**
+ * One-hot encode labes in the dataset
+ * @param {Array} dataset 
+ */
 function oneHotEncodeOrigin(dataset) {
   dataset.forEach(sample => {
     if (sample.origin === 1) {

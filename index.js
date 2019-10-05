@@ -12,8 +12,7 @@ import {
   oneHotEncodeOrigin
 } from "./preprocess";
 
-import normalize from "./stats";
-import { stat } from "fs";
+import { calculateMean, calculateStdDev, normalize } from "./stats";
 
 let predictButton = document.getElementsByClassName("predict")[0];
 let isTrainingMsg = document.getElementById("isTraining");
@@ -100,6 +99,22 @@ const prepareData = trainingSet => {
   const trainLabels = getLabels(trainDataSet);
   const testLabels = getLabels(testDataSet);
 
+  const calculateStats = dataset => {
+    for (let key in dataset[0]) {
+      console.log(key);
+      if (
+        key !== "USA" &&
+        key !== "Europe" &&
+        key !== "Japan" &&
+        key !== "mpg"
+      ) {
+        stats.mean[key] = calculateMean(dataset.map(sample => sample[key]));
+        stats.stdev[key] = calculateStdDev(dataset.map(sample => sample[key]));
+      }
+    }
+    return dataset;
+  };
+
   const normalizeDataset = dataset => {
     dataset.forEach(sample => {
       for (let [key, value] of Object.entries(sample)) {
@@ -109,19 +124,16 @@ const prepareData = trainingSet => {
           key !== "Japan" &&
           key !== "mpg"
         ) {
-          let result = normalize(value, dataset.map(sample => sample[key]));
-          sample[key] = result.normalizedValue;
-          stats.mean[key] = result.mean;
-          stats.stdev[key] = result.stdDev;
+          sample[key] = normalize(value, stats.mean[key], stats.stdev[key]);
         }
-        delete sample["mpg"];
       }
+      delete sample["mpg"];
     });
     return dataset;
   };
 
-  const normTrainData = normalizeDataset(trainDataSet);
-  const normTestData = normalizeDataset(testDataSet);
+  const normTrainData = normalizeDataset(calculateStats(trainDataSet));
+  const normTestData = normalizeDataset(calculateStats(testDataSet));
 
   console.log(normTrainData.length);
   console.table(stats);
@@ -156,8 +168,6 @@ const prepareData = trainingSet => {
     [normTestData.length, 9]
   );
 
-  //console.log(trainLabels.length);
-  //console.log(testLabels.length);
   trainLabelsTensor = tf.tensor2d(trainLabels, [trainLabels.length, 1]);
   testLabelsTensor = tf.tensor2d(testLabels, [testLabels.length, 1]);
 };
@@ -214,10 +224,7 @@ const trainData = async () => {
   }
 };
 
-//trainData().catch(console.error);
-
 const getInputData = () => {
-  console.log("entra a get input data");
   let cilynders = document.getElementsByName("cilynders")[0].value;
   let displacement = document.getElementsByName("displacement")[0].value;
   let horsepower = document.getElementsByName("horsepower")[0].value;
@@ -255,7 +262,6 @@ const getInputData = () => {
 };
 
 const predict = async inputData => {
-
   console.log("Entra a predict con los siguientes valores:");
   console.table(inputData);
 

@@ -8,8 +8,9 @@
     "build": "parcel build index.html --out-dir docs --public-url ./"
   },
   "dependencies": {
-    "@tensorflow/tfjs": "1.1.2",
-    "babel-polyfill": "^6.26.0"
+    "@tensorflow/tfjs": "^1.1.2",
+    "babel-polyfill": "^6.26.0",
+    "mathjs": "^6.2.2"
   },
   "devDependencies": {
     "@babel/core": "7.2.0",
