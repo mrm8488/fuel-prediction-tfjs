@@ -130,7 +130,7 @@ const prepareData = trainingSet => {
   };
 
   const normTrainData = normalizeDataset(calculateStats(trainDataSet));
-  const normTestData = normalizeDataset(calculateStats(testDataSet));
+  const normTestData = normalizeDataset(testDataSet);
 
   console.log(normTrainData.length);
   console.table(stats);
