@@ -16,6 +16,7 @@ import { calculateMean, calculateStdDev, normalize } from "./stats";
 
 let predictButton = document.getElementsByClassName("predict")[0];
 let isTrainingMsg = document.getElementById("isTraining");
+const cleanTensorsButton = document.getElementById("cleanTensors");
 
 const stats = {
   mean: {
@@ -264,7 +265,7 @@ const predict = async inputData => {
   console.log("Entra a predict con los siguientes valores:");
   console.table(inputData);
 
-  let newDataTensor = tf.tensor2d(
+  const newDataTensor = tf.tensor2d(
     [inputData].map(item => [
       item.cylinders,
       item.displacement,
@@ -280,19 +281,28 @@ const predict = async inputData => {
   );
 
   let prediction = model.predict(newDataTensor);
+  const predictionData = prediction.dataSync();
+  newDataTensor.dispose();
+  prediction.dispose();
 
-  displayPrediction(prediction);
+  displayPrediction(predictionData[0]);
 };
 
 const displayPrediction = prediction => {
   console.log(prediction);
   let predictionDiv = document.getElementsByClassName("prediction")[0];
+  let predictionDiv2 = document.getElementsByClassName("prediction")[1];
   let predictionSection = document.getElementsByClassName(
     "prediction-block"
   )[0];
+  let predictionSection2 = document.getElementsByClassName(
+    "prediction-block"
+  )[1];
 
-  predictionDiv.innerHTML = prediction;
+  predictionDiv.innerHTML = prediction.toFixed(2);
   predictionSection.style.display = "block";
+  predictionDiv2.innerHTML = (235.215 / prediction).toFixed(2);
+  predictionSection2.style.display = "block";
 };
 
 const init = async () => {
@@ -303,9 +313,21 @@ const init = async () => {
   if (!training) {
     isTrainingMsg.style.display = "none";
     predictButton.disabled = false;
+    cleanTensorsButton.disabled = false;
     predictButton.onclick = () => {
       const inputData = getInputData();
       predict(inputData);
+    };
+
+    cleanTensorsButton.onclick = () => {
+      tf.dispose(
+        trainDataTensor,
+        testDataTensor,
+        trainLabelsTensor,
+        testLabelsTensor,
+        model
+      );
+      console.log(`Browser Tensor Count = ${tf.memory().numTensors}`);
     };
   }
 };
